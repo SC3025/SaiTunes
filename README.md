@@ -1,36 +1,32 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sai Tunes 🎵
 
-## Getting Started
+Our department's music library: listen to and download every song, from the early 2000s to today.
 
-First, run the development server:
+- **Public site:** browse by year, search, play in the browser, download any song.
+- **Admin page (`/admin`):** log in to create new collections and special releases, upload songs, edit details, and add or remove other admins.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+**👉 Setting it up or taking it over? Read [SETUP.md](./SETUP.md).**
+
+## How it's built
+
+| Part | Service | What it stores |
+|---|---|---|
+| Website | Next.js on Vercel | the code |
+| Database + admin logins | Supabase | song and collection details, admin accounts |
+| Audio files + cover art | Cloudflare R2 | the MP3/WAV files (cheap at any size, free downloads) |
+
+```
+src/app/                 pages: home, /c/[slug] (collection), /search, /admin
+src/app/api/             server routes: upload links, deletes, admin management, downloads, keep-alive
+src/components/          player, song list, admin forms and uploader
+supabase/schema.sql      database tables and permissions (run once)
+scripts/bulk-import.mjs  import a whole folder of old music at once
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Local development
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm install
+cp .env.example .env.local   # fill in the values
+npm run dev                  # http://localhost:3000
+```
