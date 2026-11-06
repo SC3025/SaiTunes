@@ -7,49 +7,55 @@ import { usePlayer, type Track } from "./Player";
 export interface SongRow extends Track {
   track_number?: number | null;
   duration_seconds?: number | null;
-  collectionSlug?: string;
 }
 
-export default function SongList({ songs, showCollection = false }: { songs: SongRow[]; showCollection?: boolean }) {
+/** Songs laid out like numbered hymns in a songbook. */
+export default function SongList({ songs, showCollection = false, station = null }: { songs: SongRow[]; showCollection?: boolean; station?: string | null }) {
   const { current, playing, playQueue, toggle } = usePlayer();
 
-  if (!songs.length) return <p className="py-8 text-center text-muted">No songs here yet.</p>;
+  if (!songs.length) return <p className="py-8 text-center italic text-muted">No songs here yet.</p>;
 
   return (
-    <ol className="divide-y divide-line rounded-xl border border-line bg-surface">
+    <ol className="divide-y divide-line/70 border-y border-line">
       {songs.map((song, i) => {
         const isCurrent = current?.id === song.id;
         return (
-          <li key={song.id} className={`group flex items-center gap-3 px-3 py-2.5 ${isCurrent ? "bg-raised" : "hover:bg-raised/60"}`}>
+          <li key={song.id} className={`group flex items-center gap-3 py-3 sm:gap-4 ${isCurrent ? "bg-accent/5" : ""}`}>
             <button
-              onClick={() => (isCurrent ? toggle() : playQueue(songs, i))}
+              onClick={() => (isCurrent ? toggle() : playQueue(songs, i, station))}
               aria-label={isCurrent && playing ? `Pause ${song.title}` : `Play ${song.title}`}
-              className={`grid h-9 w-9 shrink-0 place-items-center rounded-full text-sm ${isCurrent ? "bg-accent text-accent-ink" : "bg-raised text-ink group-hover:bg-accent group-hover:text-accent-ink"}`}
+              className="flex w-12 shrink-0 flex-col items-center sm:w-14"
             >
-              {isCurrent && playing ? "❚❚" : "▶"}
+              <span className={`smallcaps text-[0.7rem] leading-none ${isCurrent ? "text-accent" : "text-gold"}`}>No.</span>
+              <span className={`font-display text-2xl leading-none tabular-nums ${isCurrent ? "hidden" : "group-hover:hidden"}`}>
+                {song.track_number ?? i + 1}
+              </span>
+              <span className={`text-xl leading-none text-accent ${isCurrent ? "" : "hidden group-hover:block"}`}>
+                {isCurrent && playing ? "❚❚" : "▶"}
+              </span>
             </button>
-            <div className="min-w-0 flex-1">
-              <div className={`truncate font-medium ${isCurrent ? "text-accent" : ""}`}>{song.title}</div>
-              <div className="truncate text-sm text-muted">
-                {song.artist}
+            <button onClick={() => (isCurrent ? toggle() : playQueue(songs, i, station))} className="min-w-0 flex-1 text-left">
+              <div className={`truncate font-display text-xl leading-snug ${isCurrent ? "italic text-accent" : ""}`}>{song.title}</div>
+              <div className="truncate text-[0.95rem] italic text-muted">
+                {song.artist && <>sung by {song.artist}</>}
                 {showCollection && song.collectionTitle && (
                   <>
                     {song.artist ? " · " : ""}
-                    <Link href={`/c/${song.collectionSlug}`} className="hover:text-ink hover:underline">
+                    <Link href={`/c/${song.collectionSlug}`} onClick={(e) => e.stopPropagation()} className="not-italic hover:text-accent hover:underline">
                       {song.collectionTitle}
+                      {song.year ? `, ${song.year}` : ""}
                     </Link>
                   </>
                 )}
               </div>
-            </div>
+            </button>
             <span className="hidden text-sm tabular-nums text-muted sm:block">{formatDuration(song.duration_seconds)}</span>
             <a
               href={`/api/download/${song.id}`}
-              className="rounded-full px-3 py-1.5 text-sm text-muted hover:bg-bg hover:text-ink"
+              className="smallcaps shrink-0 rounded-full px-3 py-1.5 text-sm text-muted ring-1 ring-transparent hover:text-accent hover:ring-line"
               aria-label={`Download ${song.title}`}
-              title="Download"
             >
-              ⬇<span className="ml-1 hidden sm:inline">Download</span>
+              <span className="hidden sm:inline">Keep </span>↓
             </a>
           </li>
         );

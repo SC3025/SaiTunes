@@ -156,14 +156,14 @@ export default function SongUploader({
                     style={{ width: `${Math.round((i.status === "error" ? 1 : i.progress) * 100)}%` }}
                   />
                 </span>
-                <span className={`w-16 text-right text-xs ${i.status === "error" ? "text-red-400" : "text-muted"}`} title={i.error}>
+                <span className={`w-16 text-right text-xs ${i.status === "error" ? "text-bad" : "text-muted"}`} title={i.error}>
                   {i.status === "error" ? "failed" : i.status === "done" ? "done" : i.status === "uploading" ? `${Math.round(i.progress * 100)}%` : "waiting"}
                 </span>
               </li>
             ))}
           </ul>
           {items.some((i) => i.status === "error") && (
-            <p className="text-xs text-red-400">Some uploads failed (hover &ldquo;failed&rdquo; for details). Press Upload again to retry them.</p>
+            <p className="text-xs text-bad">Some uploads failed (hover &ldquo;failed&rdquo; for details). Press Upload again to retry them.</p>
           )}
         </div>
       )}

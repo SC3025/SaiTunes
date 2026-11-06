@@ -137,8 +137,8 @@ function SongRow({ song, onChanged }: { song: Song; onChanged: () => void }) {
       {dirty && (
         <button className="btn !py-1 !text-xs" onClick={save} disabled={state === "saving"}>Save</button>
       )}
-      {!dirty && state === "saved" && <span className="text-xs text-green-400">Saved</span>}
-      {state && state !== "saving" && state !== "saved" && <span className="text-xs text-red-400">{state}</span>}
+      {!dirty && state === "saved" && <span className="text-xs text-ok">Saved</span>}
+      {state && state !== "saving" && state !== "saved" && <span className="text-xs text-bad">{state}</span>}
       <button
         className="btn btn-danger !py-1 !text-xs"
         onClick={async () => {

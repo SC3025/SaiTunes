@@ -79,7 +79,7 @@ function LoginForm() {
         <span>Password</span>
         <input type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full" />
       </label>
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {error && <p className="text-sm text-bad">{error}</p>}
       <button className="btn w-full" disabled={busy}>{busy ? "Logging in…" : "Log in"}</button>
       <p className="text-xs text-muted">Forgot your password? Any other admin can reset it for you from the admin page.</p>
     </form>

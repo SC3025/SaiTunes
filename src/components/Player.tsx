@@ -10,13 +10,18 @@ export interface Track {
   file_key: string;
   cover_key?: string | null;
   collectionTitle?: string;
+  collectionSlug?: string;
+  year?: number | null;
 }
 
 interface PlayerState {
   current: Track | null;
   playing: boolean;
-  playQueue: (tracks: Track[], startIndex: number) => void;
+  /** Label of the radio station / chapter being played, e.g. "Sai Tunes FM · 2007". */
+  station: string | null;
+  playQueue: (tracks: Track[], startIndex: number, station?: string | null) => void;
   toggle: () => void;
+  next: () => void;
 }
 
 const PlayerContext = createContext<PlayerState | null>(null);
@@ -31,14 +36,16 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [queue, setQueue] = useState<Track[]>([]);
   const [index, setIndex] = useState(0);
+  const [station, setStation] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
   const [time, setTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const current = queue[index] ?? null;
 
-  const playQueue = useCallback((tracks: Track[], startIndex: number) => {
+  const playQueue = useCallback((tracks: Track[], startIndex: number, label: string | null = null) => {
     setQueue(tracks);
     setIndex(startIndex);
+    setStation(label);
   }, []);
 
   const toggle = useCallback(() => {
@@ -55,10 +62,10 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     else setIndex((i) => Math.max(0, i - 1));
   }, []);
 
-  // Load and start the new track whenever it changes.
   useEffect(() => {
     const a = audioRef.current;
     if (!a || !current) return;
+    setTime(0);
     a.src = fileUrl(current.file_key) ?? "";
     void a.play().catch(() => setPlaying(false));
   }, [current]);
@@ -77,8 +84,10 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     navigator.mediaSession.setActionHandler("previoustrack", prev);
   }, [current, next, prev]);
 
+  const pct = duration ? Math.min(100, (time / duration) * 100) : 0;
+
   return (
-    <PlayerContext.Provider value={{ current, playing, playQueue, toggle }}>
+    <PlayerContext.Provider value={{ current, playing, station, playQueue, toggle, next }}>
       {children}
       <audio
         ref={audioRef}
@@ -90,42 +99,50 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
       />
       {current && (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 backdrop-blur">
-          <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
-            <Cover coverKey={current.cover_key} className="h-12 w-12" />
-            <div className="min-w-0 flex-1 sm:flex-none sm:w-56">
-              <div className="truncate text-sm font-semibold">{current.title}</div>
-              <div className="truncate text-xs text-muted">{current.artist ?? current.collectionTitle}</div>
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t-[3px] border-double border-line bg-surface/95 backdrop-blur">
+          {/* progress: a thin ink line you can click to seek */}
+          <input
+            type="range"
+            min={0}
+            max={duration || 0}
+            step={1}
+            value={Math.min(time, duration || 0)}
+            onChange={(e) => {
+              if (audioRef.current) audioRef.current.currentTime = Number(e.target.value);
+            }}
+            aria-label="Seek"
+            className="absolute inset-x-0 -top-[7px] h-3 w-full cursor-pointer appearance-none !rounded-none !border-0 !bg-transparent !p-0 opacity-0"
+          />
+          <div className="pointer-events-none absolute inset-x-0 -top-[3px] h-[3px] bg-accent" style={{ width: `${pct}%` }} />
+          <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3">
+            <Cover coverKey={current.cover_key} className="hidden h-12 w-12 sm:grid" />
+            <div className="min-w-0 flex-1">
+              <div className="smallcaps flex items-center gap-1.5 truncate text-xs text-gold">
+                {station && <span className="on-air inline-block h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />}
+                {station ?? current.collectionTitle ?? "Now playing"}
+              </div>
+              <div className="truncate font-display text-lg italic leading-tight">{current.title}</div>
+              <div className="truncate text-sm text-muted">
+                {current.artist ? `sung by ${current.artist}` : current.collectionTitle}
+                {station && current.collectionTitle && current.artist ? ` · ${current.collectionTitle}` : ""}
+              </div>
             </div>
+            <span className="hidden text-sm tabular-nums text-muted md:block">
+              {formatDuration(time)} / {formatDuration(duration)}
+            </span>
             <div className="flex items-center gap-1">
-              <button onClick={prev} aria-label="Previous" className="grid h-9 w-9 place-items-center rounded-full hover:bg-raised">⏮</button>
+              <button onClick={prev} aria-label="Previous" className="grid h-9 w-9 place-items-center rounded-full text-muted hover:bg-raised hover:text-ink">⏮</button>
               <button
                 onClick={toggle}
                 aria-label={playing ? "Pause" : "Play"}
-                className="grid h-10 w-10 place-items-center rounded-full bg-accent text-accent-ink"
+                className="grid h-11 w-11 place-items-center rounded-full bg-accent text-accent-ink shadow-sm"
               >
                 {playing ? "❚❚" : "▶"}
               </button>
-              <button onClick={next} aria-label="Next" disabled={index + 1 >= queue.length} className="grid h-9 w-9 place-items-center rounded-full hover:bg-raised disabled:opacity-30">⏭</button>
+              <button onClick={next} aria-label="Next" disabled={index + 1 >= queue.length} className="grid h-9 w-9 place-items-center rounded-full text-muted hover:bg-raised hover:text-ink disabled:opacity-30">⏭</button>
             </div>
-            <div className="hidden flex-1 items-center gap-2 text-xs tabular-nums text-muted sm:flex">
-              <span>{formatDuration(time)}</span>
-              <input
-                type="range"
-                min={0}
-                max={duration || 0}
-                step={1}
-                value={Math.min(time, duration || 0)}
-                onChange={(e) => {
-                  if (audioRef.current) audioRef.current.currentTime = Number(e.target.value);
-                }}
-                aria-label="Seek"
-                className="flex-1 !border-0 !p-0 accent-[var(--color-accent)]"
-              />
-              <span>{formatDuration(duration)}</span>
-            </div>
-            <a href={`/api/download/${current.id}`} className="hidden text-xs text-muted hover:text-ink sm:block" aria-label="Download current song">
-              ⬇
+            <a href={`/api/download/${current.id}`} className="smallcaps hidden text-sm text-muted hover:text-accent sm:block" aria-label="Download this song">
+              Keep ↓
             </a>
           </div>
         </div>
@@ -138,8 +155,8 @@ export function Cover({ coverKey, className = "" }: { coverKey?: string | null; 
   const url = fileUrl(coverKey);
   return url ? (
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={url} alt="" className={`shrink-0 rounded-md object-cover ${className}`} />
+    <img src={url} alt="" className={`shrink-0 rounded-sm object-cover ring-1 ring-line ${className}`} />
   ) : (
-    <div className={`grid shrink-0 place-items-center rounded-md bg-gradient-to-br from-accent/40 to-raised text-accent ${className}`}>♪</div>
+    <div className={`grid shrink-0 place-items-center rounded-sm bg-raised font-display italic text-gold ring-1 ring-line ${className}`}>❦</div>
   );
 }

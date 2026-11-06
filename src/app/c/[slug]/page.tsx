@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Cover } from "@/components/Player";
@@ -33,31 +34,54 @@ export default async function CollectionPage({ params }: { params: Promise<{ slu
     ...s,
     cover_key: c.cover_key,
     collectionTitle: c.title,
+    collectionSlug: c.slug,
+    year: c.year,
   }));
   const total = songs.reduce((n, s) => n + (s.duration_seconds ?? 0), 0);
+  const singers = [...new Set(songs.map((s) => s.artist).filter(Boolean))] as string[];
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-end">
-        <Cover coverKey={c.cover_key} className="h-44 w-44 text-5xl shadow-2xl sm:h-52 sm:w-52" />
-        <div className="min-w-0">
-          <div className="text-xs font-semibold uppercase tracking-wider text-accent">
-            {KIND_LABEL[c.kind]}
-            {c.is_featured && " · New"}
+    <article className="space-y-8">
+      <Link href={c.year ? `/#y-${c.year}` : "/"} className="smallcaps text-sm text-muted hover:text-accent">
+        ← Contents
+      </Link>
+
+      <header className="grid items-end gap-6 sm:grid-cols-[1fr_auto]">
+        <div>
+          <div className="smallcaps text-sm text-gold">
+            Chapter{c.year ? ` · ${c.year}` : ""} · {KIND_LABEL[c.kind]}
+            {c.is_featured && <span className="text-accent"> · New</span>}
           </div>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight sm:text-5xl">{c.title}</h1>
-          {c.description && <p className="mt-2 max-w-2xl whitespace-pre-line text-muted">{c.description}</p>}
-          <p className="mt-2 text-sm text-muted">
-            {[c.year, `${songs.length} songs`, total ? formatDuration(total) : null].filter(Boolean).join(" · ")}
+          <h1 className="mt-2 font-display text-4xl font-medium leading-[1.05] tracking-tight sm:text-6xl">{c.title}</h1>
+          {c.description && <p className="mt-4 max-w-2xl whitespace-pre-line text-lg italic leading-relaxed text-muted">{c.description}</p>}
+          <p className="mt-3 text-sm text-muted">
+            {[`${songs.length} song${songs.length === 1 ? "" : "s"}`, total ? formatDuration(total) : null].filter(Boolean).join(" · ")}
+            {singers.length > 0 && (
+              <>
+                {" · "}
+                <span className="italic">
+                  voices of {singers.slice(0, 4).join(", ")}
+                  {singers.length > 4 ? ` and ${singers.length - 4} more` : ""}
+                </span>
+              </>
+            )}
           </p>
           {songs.length > 0 && (
-            <div className="mt-4">
-              <PlayAllButton songs={songs} />
+            <div className="mt-5">
+              <PlayAllButton songs={songs} station={c.title} />
             </div>
           )}
         </div>
-      </div>
-      <SongList songs={songs} />
-    </div>
+        {c.cover_key && (
+          <div className="rotate-[1.5deg] bg-surface p-2.5 pb-8 shadow-[0_14px_30px_-18px_color-mix(in_srgb,var(--ink)_60%,transparent)] ring-1 ring-line">
+            <Cover coverKey={c.cover_key} className="h-48 w-48 !rounded-none !ring-0 sm:h-56 sm:w-56" />
+          </div>
+        )}
+      </header>
+
+      <div className="ornament text-sm">❦</div>
+
+      <SongList songs={songs} station={c.title} />
+    </article>
   );
 }

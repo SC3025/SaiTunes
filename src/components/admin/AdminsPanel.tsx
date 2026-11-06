@@ -95,7 +95,7 @@ export default function AdminsPanel({ myId }: { myId: string }) {
           <button className="btn" disabled={busy}>Add admin</button>
         </div>
       </form>
-      {msg && <p className={`text-sm ${msg.ok ? "text-green-400" : "text-red-400"}`}>{msg.text}</p>}
+      {msg && <p className={`text-sm ${msg.ok ? "text-ok" : "text-bad"}`}>{msg.text}</p>}
     </div>
   );
 }
@@ -115,7 +115,7 @@ export function PasswordPanel() {
     >
       <input type="password" required minLength={8} autoComplete="new-password" placeholder="New password (8+ characters)" value={pw} onChange={(e) => setPw(e.target.value)} className="min-w-0 flex-1" />
       <button className="btn">Change my password</button>
-      {msg && <p className={`w-full text-sm ${msg.ok ? "text-green-400" : "text-red-400"}`}>{msg.text}</p>}
+      {msg && <p className={`w-full text-sm ${msg.ok ? "text-ok" : "text-bad"}`}>{msg.text}</p>}
     </form>
   );
 }

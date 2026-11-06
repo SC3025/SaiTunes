@@ -106,7 +106,7 @@ export default function CollectionForm({
           Show in &ldquo;New &amp; special releases&rdquo; on the home page
         </label>
       </div>
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {error && <p className="text-sm text-bad">{error}</p>}
       <div className="flex gap-2">
         <button className="btn" disabled={busy}>{busy ? "Saving…" : existing ? "Save changes" : "Create collection"}</button>
         {onCancel && <button type="button" className="btn btn-ghost" onClick={onCancel}>Cancel</button>}

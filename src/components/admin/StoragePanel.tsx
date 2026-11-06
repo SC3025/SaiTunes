@@ -29,16 +29,16 @@ export default function StoragePanel() {
       {!status ? (
         <p className="text-muted">Checking…</p>
       ) : !status.connected ? (
-        <p className="text-red-400">
+        <p className="text-bad">
           ✗ Can&apos;t reach the storage bucket. Check the Supabase keys (or STORAGE_* settings) in Vercel, then redeploy.
           {status.error && <span className="mt-1 block text-xs text-muted">Details: {status.error}</span>}
         </p>
       ) : status.uploadsAllowed ? (
-        <p className="text-green-400">
+        <p className="text-ok">
           ✓ Storage ready for uploads ({status.provider === "s3" ? "S3-compatible storage" : "Supabase Storage"}).
         </p>
       ) : (
-        <p className="text-amber-300">Storage isn&apos;t set up yet. Click the button once.</p>
+        <p className="text-warn">Storage isn&apos;t set up yet. Click the button once.</p>
       )}
       {status?.connected && !status.uploadsAllowed && (
         <button
@@ -60,7 +60,7 @@ export default function StoragePanel() {
           {busy ? "Setting up…" : "Set up storage"}
         </button>
       )}
-      {msg && <p className="text-red-400">{msg}</p>}
+      {msg && <p className="text-bad">{msg}</p>}
     </div>
   );
 }

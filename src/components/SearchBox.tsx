@@ -10,18 +10,20 @@ function Box() {
   return (
     <form
       role="search"
+      className="flex items-center gap-2 border-b border-ink/40 focus-within:border-accent"
       onSubmit={(e) => {
         e.preventDefault();
         if (q.trim()) router.push(`/search?q=${encodeURIComponent(q.trim())}`);
       }}
     >
+      <span aria-hidden className="text-muted">⌕</span>
       <input
         type="search"
         value={q}
         onChange={(e) => setQ(e.target.value)}
-        placeholder="Search songs or artists…"
-        aria-label="Search songs or artists"
-        className="w-full !rounded-full !py-1.5 text-sm"
+        placeholder="Find a song, singer or year…"
+        aria-label="Find a song, singer or year"
+        className="w-full !rounded-none !border-0 !bg-transparent !px-0 !py-1.5 italic placeholder:text-muted"
       />
     </form>
   );
