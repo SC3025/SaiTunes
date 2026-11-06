@@ -13,11 +13,11 @@ Our department's music library: listen to and download every song, from the earl
 |---|---|---|
 | Website | Next.js on Vercel | the code |
 | Database + admin logins | Supabase | song and collection details, admin accounts |
-| Audio files + cover art | Cloudflare R2 | the MP3/WAV files (cheap at any size, free downloads) |
+| Audio files + cover art | Backblaze B2 (any S3-compatible storage works) | the MP3/WAV files, served through signed links |
 
 ```
 src/app/                 pages: home, /c/[slug] (collection), /search, /admin
-src/app/api/             server routes: upload links, deletes, admin management, downloads, keep-alive
+src/app/api/             server routes: upload links, file links, deletes, admin management, storage setup, downloads, keep-alive
 src/components/          player, song list, admin forms and uploader
 supabase/schema.sql      database tables and permissions (run once)
 scripts/bulk-import.mjs  import a whole folder of old music at once

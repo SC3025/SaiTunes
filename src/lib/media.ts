@@ -1,9 +1,12 @@
-const PUBLIC_BASE = (process.env.NEXT_PUBLIC_R2_PUBLIC_URL ?? "").replace(/\/$/, "");
+// Optional: if the bucket is public (e.g. Cloudflare R2 with an r2.dev URL), files load
+// straight from it. Otherwise they go through /api/file, which hands out a signed link.
+const PUBLIC_BASE = (process.env.NEXT_PUBLIC_FILES_PUBLIC_URL ?? "").replace(/\/$/, "");
 
-/** Public URL of a file stored in R2 (audio or cover art). */
+/** URL to play or show a stored file (audio or cover art). */
 export function fileUrl(key: string | null | undefined): string | null {
   if (!key) return null;
-  return `${PUBLIC_BASE}/${key.split("/").map(encodeURIComponent).join("/")}`;
+  const path = key.split("/").map(encodeURIComponent).join("/");
+  return PUBLIC_BASE ? `${PUBLIC_BASE}/${path}` : `/api/file/${path}`;
 }
 
 export function formatDuration(seconds: number | null | undefined): string {
@@ -27,7 +30,7 @@ export function slugify(text: string): string {
   );
 }
 
-/** Make a file name safe to use as part of an R2 key. */
+/** Make a file name safe to use as part of a storage key. */
 export function safeFileName(name: string): string {
   const dot = name.lastIndexOf(".");
   const base = dot > 0 ? name.slice(0, dot) : name;

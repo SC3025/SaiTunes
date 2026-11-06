@@ -6,12 +6,13 @@ import { useEffect, useState } from "react";
 import AdminGate from "@/components/admin/AdminGate";
 import AdminsPanel, { PasswordPanel } from "@/components/admin/AdminsPanel";
 import CollectionForm from "@/components/admin/CollectionForm";
+import StoragePanel from "@/components/admin/StoragePanel";
 import { Cover } from "@/components/Player";
 import { KIND_LABEL } from "@/lib/media";
 import { supabase } from "@/lib/supabase";
 import type { Collection } from "@/lib/types";
 
-type Tab = "music" | "admins" | "account";
+type Tab = "music" | "admins" | "account" | "storage";
 
 export default function AdminPage() {
   return <AdminGate>{(session) => <Dashboard myId={session.user.id} />}</AdminGate>;
@@ -27,6 +28,7 @@ function Dashboard({ myId }: { myId: string }) {
             ["music", "Music"],
             ["admins", "Admins"],
             ["account", "My password"],
+            ["storage", "Storage"],
           ] as [Tab, string][]
         ).map(([key, label]) => (
           <button
@@ -41,6 +43,7 @@ function Dashboard({ myId }: { myId: string }) {
       {tab === "music" && <MusicPanel />}
       {tab === "admins" && <AdminsPanel myId={myId} />}
       {tab === "account" && <PasswordPanel />}
+      {tab === "storage" && <StoragePanel />}
     </div>
   );
 }

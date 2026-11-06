@@ -1,6 +1,6 @@
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { bucket, errorResponse, HttpError, r2, requireAdmin } from "@/lib/server";
+import { bucket, errorResponse, HttpError, storage, requireAdmin } from "@/lib/server";
 import { safeFileName } from "@/lib/media";
 
 const ALLOWED = {
@@ -8,7 +8,7 @@ const ALLOWED = {
   covers: /^image\//,
 } as const;
 
-/** Gives an admin a short-lived URL to upload one file straight to R2. */
+/** Gives an admin a short-lived URL to upload one file straight to storage. */
 export async function POST(req: Request) {
   try {
     await requireAdmin(req);
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     const prefix = String(collectionSlug || "misc").replace(/[^a-z0-9-]/g, "");
     const key = `${folder}/${prefix}/${crypto.randomUUID().slice(0, 8)}-${safeFileName(filename)}`;
     const url = await getSignedUrl(
-      r2(),
+      storage(),
       new PutObjectCommand({ Bucket: bucket(), Key: key, ContentType: contentType }),
       { expiresIn: 60 * 60 },
     );

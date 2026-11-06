@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { titleFromFileName } from "@/lib/media";
 import { supabase } from "@/lib/supabase";
 import type { Collection } from "@/lib/types";
-import { deleteR2File, guessType, uploadToR2 } from "./upload";
+import { deleteStoredFile, guessType, uploadFile } from "./upload";
 
 interface Item {
   file: File;
@@ -60,7 +60,7 @@ export default function SongUploader({
     let key: string | null = null;
     try {
       const tags = await readTags(item.file);
-      key = await uploadToR2(item.file, "audio", collection.slug, (p) => update(item.file, { progress: p }));
+      key = await uploadFile(item.file, "audio", collection.slug, (p) => update(item.file, { progress: p }));
       const { error } = await supabase().from("songs").insert({
         collection_id: collection.id,
         title: tags.title,
@@ -75,7 +75,7 @@ export default function SongUploader({
       if (error) throw new Error(error.message);
       update(item.file, { status: "done", progress: 1 });
     } catch (e) {
-      if (key) await deleteR2File(key);
+      if (key) await deleteStoredFile(key);
       update(item.file, { status: "error", error: e instanceof Error ? e.message : String(e) });
     }
   }

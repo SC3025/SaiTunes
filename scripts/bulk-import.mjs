@@ -45,11 +45,13 @@ const need = (k) => {
 
 const db = createClient(need("NEXT_PUBLIC_SUPABASE_URL"), need("SUPABASE_SERVICE_ROLE_KEY"), { auth: { persistSession: false } });
 const s3 = new S3Client({
-  region: "auto",
-  endpoint: `https://${need("R2_ACCOUNT_ID")}.r2.cloudflarestorage.com`,
-  credentials: { accessKeyId: need("R2_ACCESS_KEY_ID"), secretAccessKey: need("R2_SECRET_ACCESS_KEY") },
+  region: process.env.STORAGE_REGION || "auto",
+  endpoint: need("STORAGE_ENDPOINT"),
+  credentials: { accessKeyId: need("STORAGE_ACCESS_KEY_ID"), secretAccessKey: need("STORAGE_SECRET_ACCESS_KEY") },
+  requestChecksumCalculation: "WHEN_REQUIRED",
+  responseChecksumValidation: "WHEN_REQUIRED",
 });
-const BUCKET = need("R2_BUCKET");
+const BUCKET = need("STORAGE_BUCKET");
 
 const AUDIO = { ".mp3": "audio/mpeg", ".m4a": "audio/mp4", ".aac": "audio/aac", ".wav": "audio/wav", ".flac": "audio/flac", ".ogg": "audio/ogg", ".opus": "audio/ogg" };
 const IMAGE = { ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp" };

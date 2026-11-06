@@ -4,7 +4,7 @@ import { useState } from "react";
 import { fileUrl, slugify } from "@/lib/media";
 import { supabase } from "@/lib/supabase";
 import type { Collection, CollectionKind } from "@/lib/types";
-import { deleteR2File, uploadToR2 } from "./upload";
+import { deleteStoredFile, uploadFile } from "./upload";
 
 /** Create a new collection, or edit an existing one. */
 export default function CollectionForm({
@@ -35,7 +35,7 @@ export default function CollectionForm({
       const slug = existing?.slug ?? slugify(`${title} ${yearNum ?? ""}`);
 
       let cover_key = existing?.cover_key ?? null;
-      if (cover) cover_key = await uploadToR2(cover, "covers", slug);
+      if (cover) cover_key = await uploadFile(cover, "covers", slug);
 
       const fields = { title: title.trim(), year: yearNum, kind, description: description.trim() || null, is_featured: featured, cover_key };
       const sb = supabase();
@@ -50,10 +50,10 @@ export default function CollectionForm({
         }
       }
       if (result.error) {
-        if (cover && cover_key) await deleteR2File(cover_key);
+        if (cover && cover_key) await deleteStoredFile(cover_key);
         throw new Error(result.error.message);
       }
-      if (cover && existing?.cover_key) await deleteR2File(existing.cover_key);
+      if (cover && existing?.cover_key) await deleteStoredFile(existing.cover_key);
       onSaved(result.data as Collection);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));

@@ -1,17 +1,16 @@
-import { DeleteObjectsCommand } from "@aws-sdk/client-s3";
-import { bucket, errorResponse, HttpError, r2, requireAdmin, serviceClient } from "@/lib/server";
+import { DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { bucket, errorResponse, HttpError, storage, requireAdmin, serviceClient } from "@/lib/server";
 
+/** Deletes files one at a time (works on every S3-compatible service), a few in parallel. */
 async function deleteFiles(keys: string[]) {
-  for (let i = 0; i < keys.length; i += 1000) {
-    const chunk = keys.slice(i, i + 1000);
-    if (!chunk.length) continue;
-    await r2().send(
-      new DeleteObjectsCommand({ Bucket: bucket(), Delete: { Objects: chunk.map((Key) => ({ Key })), Quiet: true } }),
+  for (let i = 0; i < keys.length; i += 10) {
+    await Promise.all(
+      keys.slice(i, i + 10).map((Key) => storage().send(new DeleteObjectCommand({ Bucket: bucket(), Key }))),
     );
   }
 }
 
-/** Deletes a song or a whole collection, including the files in R2. */
+/** Deletes a song or a whole collection, including the stored files. */
 export async function POST(req: Request) {
   try {
     await requireAdmin(req);

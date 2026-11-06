@@ -15,23 +15,43 @@ export function serviceClient(): SupabaseClient {
   });
 }
 
-let r2Client: S3Client | null = null;
-export function r2(): S3Client {
-  if (!r2Client) {
-    r2Client = new S3Client({
-      region: "auto",
-      endpoint: `https://${required("R2_ACCOUNT_ID")}.r2.cloudflarestorage.com`,
+let storageClient: S3Client | null = null;
+
+/**
+ * Client for the S3-compatible bucket that holds the audio and cover files.
+ * Works with Backblaze B2 (no card needed), Cloudflare R2, AWS S3 and others:
+ * only STORAGE_ENDPOINT / STORAGE_REGION differ.
+ */
+export function storage(): S3Client {
+  if (!storageClient) {
+    storageClient = new S3Client({
+      region: process.env.STORAGE_REGION || "auto",
+      endpoint: required("STORAGE_ENDPOINT"),
       credentials: {
-        accessKeyId: required("R2_ACCESS_KEY_ID"),
-        secretAccessKey: required("R2_SECRET_ACCESS_KEY"),
+        accessKeyId: required("STORAGE_ACCESS_KEY_ID"),
+        secretAccessKey: required("STORAGE_SECRET_ACCESS_KEY"),
       },
+      // Newer AWS SDKs add checksums that S3-compatible services (B2, R2) and
+      // browser uploads to signed URLs don't handle. Only send them when required.
+      requestChecksumCalculation: "WHEN_REQUIRED",
+      responseChecksumValidation: "WHEN_REQUIRED",
     });
   }
-  return r2Client;
+  return storageClient;
 }
 
 export function bucket(): string {
-  return required("R2_BUCKET");
+  return required("STORAGE_BUCKET");
+}
+
+/**
+ * Signing time rounded down to the hour, so the same file gets the same signed URL
+ * for an hour and browsers can cache it instead of downloading it again.
+ */
+export function hourlySigningDate(): Date {
+  const d = new Date();
+  d.setUTCMinutes(0, 0, 0);
+  return d;
 }
 
 export class HttpError extends Error {

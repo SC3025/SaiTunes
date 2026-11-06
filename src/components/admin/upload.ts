@@ -1,7 +1,7 @@
 import { adminFetch } from "@/lib/supabase";
 
-/** Uploads a file straight from the browser to R2 and returns its key. */
-export async function uploadToR2(
+/** Uploads a file straight from the browser to storage and returns its key. */
+export async function uploadFile(
   file: File,
   folder: "audio" | "covers",
   collectionSlug: string,
@@ -21,7 +21,7 @@ export async function uploadToR2(
     xhr.setRequestHeader("Content-Type", contentType);
     xhr.upload.onprogress = (e) => e.lengthComputable && onProgress?.(e.loaded / e.total);
     xhr.onload = () => (xhr.status < 300 ? resolve() : reject(new Error(`Upload failed (${xhr.status})`)));
-    xhr.onerror = () => reject(new Error("Upload failed. Check your connection, or the R2 CORS settings (see SETUP.md)."));
+    xhr.onerror = () => reject(new Error("Upload failed. Check your connection, or the storage CORS settings (see SETUP.md)."));
     xhr.send(file);
   });
   return key;
@@ -45,6 +45,6 @@ export function guessType(name: string): string {
   return map[ext ?? ""] ?? "application/octet-stream";
 }
 
-export async function deleteR2File(key: string) {
+export async function deleteStoredFile(key: string) {
   await adminFetch("/api/admin/delete", { type: "file", id: key }).catch(() => {});
 }

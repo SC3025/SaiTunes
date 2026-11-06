@@ -11,7 +11,7 @@ create table if not exists public.collections (
   year         int,
   kind         text not null default 'album' check (kind in ('album', 'year', 'special')),
   description  text,
-  cover_key    text,                       -- path of the cover image in R2
+  cover_key    text,                       -- path of the cover image in storage
   is_featured  boolean not null default false, -- shows in "New & Special Releases"
   created_at   timestamptz not null default now()
 );
@@ -23,7 +23,7 @@ create table if not exists public.songs (
   artist            text,
   track_number      int,
   duration_seconds  int,
-  file_key          text not null,          -- path of the audio file in R2
+  file_key          text not null,          -- path of the audio file in storage
   file_size         bigint,
   mime_type         text,
   original_filename text,                   -- used by the bulk importer to skip duplicates

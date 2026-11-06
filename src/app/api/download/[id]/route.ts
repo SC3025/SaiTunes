@@ -1,6 +1,6 @@
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { bucket, r2, serviceClient } from "@/lib/server";
+import { bucket, hourlySigningDate, storage, serviceClient } from "@/lib/server";
 
 /** Sends the browser to the song file with a "save as" header and a friendly file name. */
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -18,13 +18,13 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   const name = `${song.artist ? `${song.artist} - ` : ""}${song.title}${ext}`.replace(/[\\/:*?"<>|]+/g, "");
   const ascii = name.replace(/[^\x20-\x7e]/g, "_");
   const url = await getSignedUrl(
-    r2(),
+    storage(),
     new GetObjectCommand({
       Bucket: bucket(),
       Key: song.file_key,
       ResponseContentDisposition: `attachment; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(name)}`,
     }),
-    { expiresIn: 60 * 10 },
+    { expiresIn: 60 * 60 * 2, signingDate: hourlySigningDate() },
   );
   return Response.redirect(url, 302);
 }
