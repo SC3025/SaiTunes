@@ -55,7 +55,7 @@ export default function SongList({ songs, showCollection = false, station = null
               className="smallcaps shrink-0 rounded-full px-3 py-1.5 text-sm text-muted ring-1 ring-transparent hover:text-accent hover:ring-line"
               aria-label={`Download ${song.title}`}
             >
-              <span className="hidden sm:inline">Keep </span>↓
+              <span className="hidden sm:inline">Download </span>↓
             </a>
           </li>
         );

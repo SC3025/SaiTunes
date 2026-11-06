@@ -91,7 +91,7 @@ export default function RadioDial({ years, totalSongs }: { years: DialYear[]; to
         collectionSlug: r.collections?.slug,
         year: r.collections?.year,
       }));
-      if (!tracks.length) throw new Error("Nothing on this frequency yet.");
+      if (!tracks.length) throw new Error("No songs for this year yet.");
       playQueue(tracks, 0, stationName(sel));
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -122,11 +122,11 @@ export default function RadioDial({ years, totalSongs }: { years: DialYear[]; to
             {stop.year ?? <span className="italic">All years</span>}
           </div>
           <div className="mt-1 text-sm italic text-muted">
-            {stop.songs.toLocaleString()} song{stop.songs === 1 ? "" : "s"} on this frequency
+            {stop.songs.toLocaleString()} song{stop.songs === 1 ? "" : "s"}
             {stop.year && (
               <>
                 {" · "}
-                <a href={`#y-${stop.year}`} className="underline decoration-line underline-offset-4 hover:text-accent">read the {stop.year} chapter</a>
+                <a href={`#y-${stop.year}`} className="underline decoration-line underline-offset-4 hover:text-accent">go to {stop.year}</a>
               </>
             )}
           </div>

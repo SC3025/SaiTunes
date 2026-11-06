@@ -43,13 +43,13 @@ export default async function CollectionPage({ params }: { params: Promise<{ slu
   return (
     <article className="space-y-8">
       <Link href={c.year ? `/#y-${c.year}` : "/"} className="smallcaps text-sm text-muted hover:text-accent">
-        ← Contents
+        ← All music
       </Link>
 
       <header className="grid items-end gap-6 sm:grid-cols-[1fr_auto]">
         <div>
           <div className="smallcaps text-sm text-gold">
-            Chapter{c.year ? ` · ${c.year}` : ""} · {KIND_LABEL[c.kind]}
+            {c.year ? `${c.year} · ` : ""}{KIND_LABEL[c.kind]}
             {c.is_featured && <span className="text-accent"> · New</span>}
           </div>
           <h1 className="mt-2 font-display text-4xl font-medium leading-[1.05] tracking-tight sm:text-6xl">{c.title}</h1>
@@ -60,7 +60,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ slu
               <>
                 {" · "}
                 <span className="italic">
-                  voices of {singers.slice(0, 4).join(", ")}
+                  {singers.slice(0, 4).join(", ")}
                   {singers.length > 4 ? ` and ${singers.length - 4} more` : ""}
                 </span>
               </>
@@ -78,8 +78,6 @@ export default async function CollectionPage({ params }: { params: Promise<{ slu
           </div>
         )}
       </header>
-
-      <div className="ornament text-sm">❦</div>
 
       <SongList songs={songs} station={c.title} />
     </article>

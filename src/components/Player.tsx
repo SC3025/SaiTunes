@@ -142,7 +142,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
               <button onClick={next} aria-label="Next" disabled={index + 1 >= queue.length} className="grid h-9 w-9 place-items-center rounded-full text-muted hover:bg-raised hover:text-ink disabled:opacity-30">⏭</button>
             </div>
             <a href={`/api/download/${current.id}`} className="smallcaps hidden text-sm text-muted hover:text-accent sm:block" aria-label="Download this song">
-              Keep ↓
+              Download ↓
             </a>
           </div>
         </div>

@@ -10,7 +10,7 @@ const newsreader = Newsreader({ subsets: ["latin"], variable: "--font-newsreader
 
 export const metadata: Metadata = {
   title: "Sai Tunes",
-  description: "The department songbook: every song from the early 2000s to today, to listen to and keep.",
+  description: "Listen to and download the department's music.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -24,7 +24,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 <div className="font-display text-3xl font-semibold leading-none tracking-tight sm:text-4xl">
                   Sai <span className="italic text-accent">Tunes</span>
                 </div>
-                <div className="smallcaps mt-1 text-sm text-muted">The department songbook</div>
               </Link>
               <div className="ml-auto w-full sm:w-64">
                 <SearchBox />
@@ -33,9 +32,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           </header>
           <main className="mx-auto max-w-5xl px-4 pb-36 pt-8">{children}</main>
           <footer className="mx-auto max-w-5xl px-4 pb-32">
-            <div className="ornament text-sm">❦</div>
-            <div className="mt-3 flex justify-between text-sm text-muted">
-              <span className="italic">Made with love by the department</span>
+            <div className="flex justify-end border-t border-line pt-3 text-sm text-muted">
               <Link href="/admin" className="smallcaps hover:text-ink">Admin</Link>
             </div>
           </footer>

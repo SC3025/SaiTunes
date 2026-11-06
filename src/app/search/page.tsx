@@ -37,19 +37,19 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   return (
     <div className="space-y-10">
       <header>
-        <div className="smallcaps text-sm text-gold">Index</div>
+        <div className="smallcaps text-sm text-gold">Search</div>
         <h1 className="mt-1 font-display text-4xl font-medium tracking-tight">
           &ldquo;<span className="italic">{raw}</span>&rdquo;
         </h1>
         <p className="mt-1 text-muted">
           {songs.length} song{songs.length === 1 ? "" : "s"}
-          {collections.length > 0 && `, ${collections.length} chapter${collections.length === 1 ? "" : "s"}`}
+          {collections.length > 0 && `, ${collections.length} collection${collections.length === 1 ? "" : "s"}`}
         </p>
       </header>
 
       {collections.length > 0 && (
         <section>
-          <h2 className="smallcaps ornament text-base">Chapters</h2>
+          <h2 className="smallcaps ornament text-base">Collections</h2>
           <ul className="mt-4 space-y-1.5">
             {collections.map((c) => (
               <li key={c.id}>
@@ -68,7 +68,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
         <h2 className="smallcaps ornament text-base">Songs</h2>
         <div className="mt-4">
           {songs.length === 0 ? (
-            <p className="text-center italic text-muted">No songs match. Try a singer&apos;s name or a year.</p>
+            <p className="text-center italic text-muted">No songs found.</p>
           ) : (
             <SongList songs={songs} showCollection />
           )}

@@ -39,24 +39,17 @@ export default async function Home() {
 
   return (
     <div className="space-y-14">
-      <section className="space-y-6">
-        <div className="max-w-2xl">
-          <p className="smallcaps text-sm text-gold">
-            {first && last ? `${first} – ${last}` : "Our music"} · {totalSongs.toLocaleString()} songs
-          </p>
-          <h1 className="mt-1 font-display text-4xl font-medium leading-[1.05] tracking-tight sm:text-5xl">
-            Every song we&apos;ve ever sung, <span className="italic text-accent">in one book.</span>
-          </h1>
-          <p className="mt-3 text-lg text-muted">
-            Turn the dial to a year and tune in, or read through the chapters below. Every song can be downloaded to keep.
-          </p>
-        </div>
+      <section className="space-y-3">
+        <p className="smallcaps text-sm text-gold">
+          {first && last ? `${first} – ${last} · ` : ""}
+          {totalSongs.toLocaleString()} songs · {collections.length.toLocaleString()} collections
+        </p>
         <RadioDial years={dialYears} totalSongs={totalSongs} />
       </section>
 
       {featured.length > 0 && (
         <section className="rounded-xl border-[3px] border-double border-gold/50 bg-surface px-5 py-5 sm:px-7">
-          <div className="smallcaps text-center text-sm text-gold">❦ New this season ❦</div>
+          <div className="smallcaps text-center text-sm text-gold">New releases</div>
           <ul className="mt-3 grid gap-x-8 gap-y-2 sm:grid-cols-2">
             {featured.map((c) => (
               <li key={c.id}>
@@ -72,9 +65,9 @@ export default async function Home() {
       )}
 
       <section aria-labelledby="contents">
-        <h2 id="contents" className="smallcaps ornament text-base">Contents</h2>
+        <h2 id="contents" className="smallcaps ornament text-base">All music</h2>
         {collections.length === 0 && (
-          <p className="mt-6 text-center italic text-muted">The book is empty for now. Admins can add the first chapter.</p>
+          <p className="mt-6 text-center italic text-muted">No music yet.</p>
         )}
         <div className="mt-6 space-y-8">
           {[...byYear.entries()].map(([year, list]) => (
