@@ -1,13 +1,29 @@
-// Optional: if the bucket is public (e.g. Cloudflare R2 with an r2.dev URL), files load
-// straight from it. Otherwise they go through /api/file, which hands out a signed link.
+/** "supabase" (default, files in Supabase Storage) or "s3" (Backblaze B2 / Cloudflare R2 / AWS). */
+export const STORAGE_MODE: "supabase" | "s3" = process.env.NEXT_PUBLIC_STORAGE === "s3" ? "s3" : "supabase";
+export const SUPABASE_BUCKET = "music";
+
+// Optional: a public base URL for files (e.g. a Cloudflare R2 r2.dev URL) when using s3 mode.
 const PUBLIC_BASE = (process.env.NEXT_PUBLIC_FILES_PUBLIC_URL ?? "").replace(/\/$/, "");
+
+function encodeKey(key: string): string {
+  return key.split("/").map(encodeURIComponent).join("/");
+}
+
+export function supabasePublicUrl(key: string): string {
+  const base = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").replace(/\/$/, "");
+  return `${base}/storage/v1/object/public/${SUPABASE_BUCKET}/${encodeKey(key)}`;
+}
 
 /** URL to play or show a stored file (audio or cover art). */
 export function fileUrl(key: string | null | undefined): string | null {
   if (!key) return null;
-  const path = key.split("/").map(encodeURIComponent).join("/");
-  return PUBLIC_BASE ? `${PUBLIC_BASE}/${path}` : `/api/file/${path}`;
+  if (PUBLIC_BASE) return `${PUBLIC_BASE}/${encodeKey(key)}`;
+  if (STORAGE_MODE === "supabase") return supabasePublicUrl(key);
+  return `/api/file/${encodeKey(key)}`;
 }
+
+/** Largest file admins can upload (Supabase's free plan allows 50 MB per file). */
+export const MAX_UPLOAD_MB = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || 50);
 
 export function formatDuration(seconds: number | null | undefined): string {
   if (seconds == null || !isFinite(seconds)) return "";

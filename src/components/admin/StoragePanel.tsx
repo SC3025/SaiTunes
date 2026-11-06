@@ -3,9 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { adminFetch } from "@/lib/supabase";
 
-type Status = { connected: boolean; uploadsAllowed?: boolean; error?: string };
+type Status = { provider?: "supabase" | "s3"; connected: boolean; uploadsAllowed?: boolean; error?: string };
 
-/** One-click check and fix for the file storage (Backblaze B2 / R2) settings. */
+/** One-click check and setup for file storage (Supabase Storage, or S3-compatible). */
 export default function StoragePanel() {
   const [status, setStatus] = useState<Status | null>(null);
   const [msg, setMsg] = useState("");
@@ -30,13 +30,15 @@ export default function StoragePanel() {
         <p className="text-muted">Checking…</p>
       ) : !status.connected ? (
         <p className="text-red-400">
-          ✗ Can&apos;t reach the storage bucket. Check the STORAGE_* settings in Vercel, then redeploy.
+          ✗ Can&apos;t reach the storage bucket. Check the Supabase keys (or STORAGE_* settings) in Vercel, then redeploy.
           {status.error && <span className="mt-1 block text-xs text-muted">Details: {status.error}</span>}
         </p>
       ) : status.uploadsAllowed ? (
-        <p className="text-green-400">✓ Storage connected and ready for uploads.</p>
+        <p className="text-green-400">
+          ✓ Storage ready for uploads ({status.provider === "s3" ? "S3-compatible storage" : "Supabase Storage"}).
+        </p>
       ) : (
-        <p className="text-amber-300">Storage is connected, but uploads from the website aren&apos;t switched on yet.</p>
+        <p className="text-amber-300">Storage isn&apos;t set up yet. Click the button once.</p>
       )}
       {status?.connected && !status.uploadsAllowed && (
         <button
@@ -55,7 +57,7 @@ export default function StoragePanel() {
             }
           }}
         >
-          {busy ? "Setting up…" : "Switch on uploads"}
+          {busy ? "Setting up…" : "Set up storage"}
         </button>
       )}
       {msg && <p className="text-red-400">{msg}</p>}

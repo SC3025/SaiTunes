@@ -13,7 +13,7 @@ Our department's music library: listen to and download every song, from the earl
 |---|---|---|
 | Website | Next.js on Vercel | the code |
 | Database + admin logins | Supabase | song and collection details, admin accounts |
-| Audio files + cover art | Backblaze B2 (any S3-compatible storage works) | the MP3/WAV files, served through signed links |
+| Audio files + cover art | Supabase Storage (can switch to Backblaze B2 / R2 later) | the MP3 files and cover images |
 
 ```
 src/app/                 pages: home, /c/[slug] (collection), /search, /admin

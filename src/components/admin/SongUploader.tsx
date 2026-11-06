@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { titleFromFileName } from "@/lib/media";
+import { MAX_UPLOAD_MB, titleFromFileName } from "@/lib/media";
 import { supabase } from "@/lib/supabase";
 import type { Collection } from "@/lib/types";
 import { deleteStoredFile, guessType, uploadFile } from "./upload";
@@ -116,7 +116,7 @@ export default function SongUploader({
       >
         <div className="text-3xl">♪</div>
         <p className="mt-1 font-medium">Drop songs here, or click to choose</p>
-        <p className="text-sm text-muted">MP3, M4A, WAV, FLAC, OGG. You can pick many at once. Title, singer and length are read from the file.</p>
+        <p className="text-sm text-muted">MP3, M4A, WAV, FLAC, OGG, up to {MAX_UPLOAD_MB} MB each. You can pick many at once. Title, singer and length are read from the file.</p>
         <input
           ref={inputRef}
           type="file"

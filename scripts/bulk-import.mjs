@@ -44,14 +44,28 @@ const need = (k) => {
 };
 
 const db = createClient(need("NEXT_PUBLIC_SUPABASE_URL"), need("SUPABASE_SERVICE_ROLE_KEY"), { auth: { persistSession: false } });
-const s3 = new S3Client({
-  region: process.env.STORAGE_REGION || "auto",
-  endpoint: need("STORAGE_ENDPOINT"),
-  credentials: { accessKeyId: need("STORAGE_ACCESS_KEY_ID"), secretAccessKey: need("STORAGE_SECRET_ACCESS_KEY") },
-  requestChecksumCalculation: "WHEN_REQUIRED",
-  responseChecksumValidation: "WHEN_REQUIRED",
-});
-const BUCKET = need("STORAGE_BUCKET");
+// Files go to Supabase Storage by default, or to S3-compatible storage if NEXT_PUBLIC_STORAGE=s3.
+const USE_S3 = process.env.NEXT_PUBLIC_STORAGE === "s3";
+const SUPABASE_BUCKET = "music";
+const MAX_BYTES = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || 50) * 1024 * 1024;
+const s3 = USE_S3
+  ? new S3Client({
+      region: process.env.STORAGE_REGION || "auto",
+      endpoint: need("STORAGE_ENDPOINT"),
+      credentials: { accessKeyId: need("STORAGE_ACCESS_KEY_ID"), secretAccessKey: need("STORAGE_SECRET_ACCESS_KEY") },
+      requestChecksumCalculation: "WHEN_REQUIRED",
+      responseChecksumValidation: "WHEN_REQUIRED",
+    })
+  : null;
+const BUCKET = USE_S3 ? need("STORAGE_BUCKET") : SUPABASE_BUCKET;
+
+if (!USE_S3 && !DRY) {
+  const { data } = await db.storage.getBucket(SUPABASE_BUCKET);
+  if (!data) {
+    const { error } = await db.storage.createBucket(SUPABASE_BUCKET, { public: true, fileSizeLimit: MAX_BYTES, allowedMimeTypes: ["audio/*", "image/*"] });
+    if (error && !/already exists/i.test(error.message)) throw error;
+  }
+}
 
 const AUDIO = { ".mp3": "audio/mpeg", ".m4a": "audio/mp4", ".aac": "audio/aac", ".wav": "audio/wav", ".flac": "audio/flac", ".ogg": "audio/ogg", ".opus": "audio/ogg" };
 const IMAGE = { ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp" };
@@ -86,8 +100,16 @@ function describe(dir) {
 }
 
 async function upload(file, key, contentType) {
+  const size = (await stat(file)).size;
+  if (!USE_S3 && size > MAX_BYTES) throw new Error(`larger than ${MAX_BYTES / 1048576} MB, convert it to MP3 first`);
   if (DRY) return;
-  await s3.send(new PutObjectCommand({ Bucket: BUCKET, Key: key, Body: await readFile(file), ContentType: contentType }));
+  const body = await readFile(file);
+  if (USE_S3) {
+    await s3.send(new PutObjectCommand({ Bucket: BUCKET, Key: key, Body: body, ContentType: contentType }));
+  } else {
+    const { error } = await db.storage.from(BUCKET).upload(key, body, { contentType, cacheControl: "31536000", upsert: false });
+    if (error) throw error;
+  }
 }
 
 async function importFolder({ dir, audio, images }) {
